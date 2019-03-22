@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const { getTwitterCount, getInstagramCount } = require('./scraper');
 const { db } = require('./db');
+const { uniqueCount } = require('./utill');
 require('./cron');
 
 const app = express();
@@ -17,9 +18,12 @@ app.get('/scrape', async (req, res, next) => {
 
 app.get('/data', async (req, res, next) => {
   // get the scrape data
-  const twitter = db.value();
+  const { instagram, twitter } = db.value();
+  // filter for only unique values
+  const uniTwitter = uniqueCount(twitter);
+  const uniInstagram = uniqueCount(instagram);
   // respond with json
-  res.json(twitter);
+  res.json({ instagram: uniInstagram, twitter: uniTwitter });
 });
 
 app.listen(3333, () =>
